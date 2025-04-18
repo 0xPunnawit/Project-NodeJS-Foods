@@ -1,4 +1,4 @@
-# 🍽️ Food Ordering Web Application - PBRU IT
+# 🍽️ Food Ordering Web Application
 
 ระบบเว็บไซต์สั่งอาหารออนไลน์ ที่พัฒนาโดยใช้ **Node.js + Express.js + MySQL (XAMPP)**  
 รองรับการสั่งอาหารจากลูกค้า การจัดการร้านค้าสำหรับ vendor และการตรวจสอบ slip การชำระเงินด้วย API (SlipOK)  
