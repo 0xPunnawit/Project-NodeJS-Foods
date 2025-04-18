@@ -1,0 +1,49 @@
+body {
+    background-color: #f8f9fa;
+  }
+
+  .card {
+    border-radius: 15px;
+    background: #ffffff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-title {
+    font-weight: bold;
+    font-size: 1.5rem;
+  }
+
+  .list-group-item {
+    border: none;
+    background-color: #f8f9fa;
+    font-size: 1rem;
+  }
+
+  .total-price {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #007bff;
+  }
+
+  .btn-warning {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    font-size: 1.2rem;
+  }
+
+  .btn-warning:hover {
+    background-color: #e0a800;
+    border-color: #d39e00;
+  }
+
+  .btn-success {
+    font-size: 1.2rem;
+  }
+
+  .header-bg {
+    background: linear-gradient(135deg, #007bff, #00c4ff);
+    color: #fff;
+    padding: 20px;
+    border-radius: 15px 15px 0 0;
+    text-align: center;
+  }

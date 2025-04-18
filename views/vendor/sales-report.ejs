@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title>📊 รายงานยอดขาย</title>
+    <style>
+        body {
+            font-family: "Prompt", sans-serif;
+            background-color: #f8f9fa;
+            padding-top: 60px;
+        }
+
+        .card {
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .highlight {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .best-seller {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #dc3545;
+        }
+
+        .list-group-item {
+            font-size: 1.1rem;
+        }
+
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/navbar') %>
+        <div class="container mt-4">
+            <h2 class="text-center">📊 รายงานยอดขาย</h2>
+            </p>
+
+            <div class="mb-3">
+                <label for="salesPeriod" class="form-label"><strong>📅 เลือกช่วงเวลา วันที่</strong></label>
+                <select id="salesPeriod" class="form-select">
+                    <option value="daily" selected>📅 วันนี้</option>
+                    <option value="weekly">📅 7 วัน</option>
+                    <option value="monthly">📅 30 วัน</option>
+                </select>
+            </div>
+
+            <!-- 📌 การ์ดสรุปยอดขาย -->
+            <div class="card p-3 mb-3">
+                <h4><i class="fas fa-chart-line"></i> สรุปยอดขาย</h4>
+                <p><strong>💰 ยอดขายรวม:</strong> <span class="highlight" id="totalSales">-</span> บาท</p>
+                <p><strong>🛒 จำนวนออเดอร์:</strong> <span class="highlight" id="totalOrders">-</span> ออเดอร์</p>
+                <p><strong>📦 จำนวนรายการเมนู:</strong> <span class="highlight" id="totalItems">-</span> รายการ</p>
+                <p><strong>🔥 เมนูขายดี 3 อันดับแรก:</strong></p>
+                <ul class="best-seller">
+                    <li id="bestSellingItem1">1️⃣ -</li>
+                    <li id="bestSellingItem2">2️⃣ -</li>
+                    <li id="bestSellingItem3">3️⃣ -</li>
+                </ul>
+            </div>
+
+            <div class="card p-3">
+                <h4><i class="fas fa-box"></i> รายการออเดอร์</h4>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>🛒 ออเดอร์</th>
+                            <th>📜 รายการเมนู</th>
+                            <th>💰 ราคารวม</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody"></tbody>
+                </table>
+            </div>
+
+            <script>
+                $(document).ready(function () {
+                    function fetchReport() {
+                        let period = $("#salesPeriod").val();
+                        $.ajax({
+                            url: `/sales-report?period=${period}`,
+                            method: "GET",
+                            success: function (data) {
+                                if (data.success) {
+                                    $("#totalSales").text(parseFloat(data.totalSales).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                                    $("#totalOrders").text(data.totalOrders);
+                                    $("#totalItems").text(data.totalItems);
+                
+                                    // 📌 อัปเดตเมนูขายดี 3 อันดับแรก
+                                    const topIcons = ["1️⃣", "2️⃣", "3️⃣"];
+                                    for (let i = 0; i < 3; i++) {
+                                        let item = data.bestSellingItems[i];
+                                        let elementId = `#bestSellingItem${i + 1}`;
+                                        if (item) {
+                                            $(elementId).text(`${topIcons[i]} ${item.name} (${item.quantity} รายการ)`);
+                                        } else {
+                                            $(elementId).text(`${topIcons[i]} -`);
+                                        }
+                                    }
+                
+                                    $("#orderTableBody").empty();
+                                    if (Object.keys(data.orderDetails).length === 0) {
+                                        $("#orderTableBody").append("<tr><td colspan='3' class='text-center text-danger'>⛔ ไม่มีข้อมูล</td></tr>");
+                                    } else {
+                                        Object.keys(data.orderDetails).forEach(orderId => {
+                                            let order = data.orderDetails[orderId];
+                                            let menuItems = order.items.map(item => `${item.menuName} - ${item.quantity} รายการ`).join("<br>");
+                                            let totalOrderPrice = parseFloat(order.totalOrderPrice).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                
+                                            $("#orderTableBody").append(`
+                                                <tr>
+                                                    <td>🛒 ออเดอร์ #${orderId}</td>
+                                                    <td>${menuItems}</td>
+                                                    <td>${totalOrderPrice} บาท</td>
+                                                </tr>
+                                            `);
+                                        });
+                                    }
+                                }
+                            },
+                            error: function (xhr) {
+                                console.error("❌ Error fetching sales report:", xhr.responseText);
+                                $("#orderTableBody").html("<tr><td colspan='3' class='text-danger text-center'>❌ เกิดข้อผิดพลาด</td></tr>");
+                            }
+                        });
+                    }
+                
+                    $("#salesPeriod").change(fetchReport);
+                    fetchReport();
+                });
+                
+            </script>
+
+</body>
+
+</html>

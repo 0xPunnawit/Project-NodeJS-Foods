@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="/css/add-menu.css" rel="stylesheet" />
+  <title>เพิ่มเมนูอาหาร</title>
+</head>
+
+<body>
+  <%- include('../partials/navbar') %>
+  
+    <main>
+      <h1 class="text-center mb-2">เพิ่มเมนูอาหาร</h1>
+      <div class="form-container">
+        <form action="/vendor/add-menu/<%= restaurantId %>" method="POST" enctype="multipart/form-data" onsubmit="return validateForm();">
+          <input type="hidden" name="restaurant_id" value="<%= restaurantId ? restaurantId : '' %>" />
+
+
+          <div class="mb-3">
+            <label for="name" class="form-label">ชื่อเมนูหลัก</label>
+            <input type="text" class="form-control" id="name" name="name" required maxlength="255"
+              placeholder="เช่น ข้าวกะเพรา" />
+          </div>
+
+          <div class="mb-3 price-status-container">
+            <div class="w-50">
+              <label for="main_price" class="form-label">ราคาหลัก (บาท)</label>
+              <input type="number" class="form-control" id="main_price" name="price" required step="0.01" min="1"
+                placeholder="เช่น 50" />
+            </div>
+
+            <div class="w-50">
+              <label for="availability" class="form-label">สถานะเมนู</label>
+              <select class="form-select" id="availability" name="availability">
+                <option value="มี">มี</option>
+                <option value="ไม่มี">ไม่มี</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">ตัวเลือกเมนู + ราคาเพิ่มเติม</label>
+            <div id="menu-options">
+              <div class="d-flex mb-2">
+                <input type="text" class="form-control me-2" name="menu_options[]" placeholder="เช่น ธรรมดา" required />
+                <input type="number" class="form-control me-2" name="menu_prices[]" placeholder="ราคาเพิ่ม (บาท)"
+                  required step="0.01" min="0" oninput="preventNegative(this)" />
+                <select class="form-select me-2" name="menu_status[]">
+                  <option value="มี">มี</option>
+                  <option value="ไม่มี">ไม่มี</option>
+                </select>
+                <button type="button" class="btn-remove" onclick="removeOption(this)">
+                  X
+                </button>
+              </div>
+            </div>
+            <button type="button" class="btn btn-success w-100 mt-2" onclick="addOption()">
+              เพิ่มตัวเลือก
+            </button>
+          </div>
+
+          <div class="mb-3">
+            <label for="menu_img" class="form-label">อัปโหลดรูปเมนู</label>
+            <input type="file" class="form-control" id="menu_img" name="menu_img" accept="image/*"
+              onchange="validateImage(event)" />
+            <div class="form-text">
+              อัปโหลดเฉพาะรูปภาพ ขนาดไฟล์ต้องไม่เกิน 3MB
+            </div>
+            <img id="menu-img-preview" class="img-preview mt-2" src="#" alt="ตัวอย่างรูปเมนู" style="display: none" />
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">
+            บันทึกเมนู
+          </button>
+          <a href="/vendor/dashboard" class="btn btn-secondary w-100 mt-2">ยกเลิก</a>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      function validateImage(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById("menu-img-preview");
+        const maxSize = 3 * 1024 * 1024;
+
+        if (file && file.size > maxSize) {
+          alert("ไฟล์มีขนาดเกิน 3MB กรุณาอัปโหลดไฟล์ที่เล็กกว่านี้");
+          event.target.value = "";
+          preview.style.display = "none";
+          return;
+        }
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+          };
+          reader.readAsDataURL(file);
+        } else {
+          preview.style.display = "none";
+        }
+      }
+
+      function addOption() {
+        const container = document.getElementById("menu-options");
+        const optionDiv = document.createElement("div");
+        optionDiv.className = "d-flex mb-2";
+        optionDiv.innerHTML = `
+                <input type="text" class="form-control me-2" name="menu_options[]" placeholder="เช่น ธรรมดา" required>
+                <input type="number" class="form-control me-2" name="menu_prices[]" placeholder="ราคาเพิ่ม (บาท)" required step="0.01" min="0" oninput="preventNegative(this)">
+                <select class="form-select me-2" name="menu_status[]">
+                    <option value="มี">มี</option>
+                    <option value="ไม่มี">ไม่มี</option>
+                </select>
+                <button type="button" class="btn-remove" onclick="removeOption(this)">X</button>
+            `;
+        container.appendChild(optionDiv);
+      }
+
+      function removeOption(button) {
+        button.parentElement.remove();
+      }
+
+      function validateForm() {
+        const mainPrice = document.getElementById("main_price").value.trim();
+        if (!mainPrice || isNaN(mainPrice) || mainPrice <= 0) {
+          alert("กรุณากรอกราคาหลักที่ถูกต้อง");
+          return false;
+        }
+
+        const options = document.getElementsByName("menu_options[]");
+        const prices = document.getElementsByName("menu_prices[]");
+
+        for (let i = 0; i < options.length; i++) {
+          if (
+            options[i].value.trim() !== "" &&
+            (prices[i].value.trim() === "" || isNaN(prices[i].value))
+          ) {
+            prices[i].value = 0;
+          }
+        }
+
+        return true;
+      }
+
+      function preventNegative(input) {
+        if (input.value < 0) {
+          input.value = "";
+        }
+      }
+    </script>
+</body>
+
+</html>

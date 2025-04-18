@@ -1,0 +1,44 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f8f9fa;
+}
+
+.form-signin,
+.form-register {
+  max-width: 400px;
+  padding: 15px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  margin-top: 80px;
+}
+
+@media (max-width: 576px) {
+
+  /* สำหรับหน้าจอมือถือ */
+  .form-signin,
+  .form-register {
+    max-width: 300px;
+    padding: 10px;
+  }
+
+  .form-signin img,
+  .form-register img {
+    width: 60px;
+    height: 60px;
+    margin-top: 40px;
+  }
+}
+
+@media (min-width: 768px) {
+
+  /* สำหรับแท็บเล็ตหรือหน้าจอใหญ่กว่า */
+  .form-signin,
+  .form-register {
+    max-width: 500px;
+    padding: 20px;
+  }
+}

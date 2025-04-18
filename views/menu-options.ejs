@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/menu-options.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <title>
+    <%= title %>
+  </title>
+</head>
+
+<body data-restaurant-id="<%= restaurant ? restaurant.restaurant_id : '' %>">
+
+  <%- include('./partials/navbar') %>
+  <br>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+      <div class="card p-4 mt-5" style="max-width: 400px;">
+        <h3 class="card-title text-center">เลือกตัวเลือกเมนู</h3>
+        <form action="/menu/<%= menuItemId %>/order" method="POST">
+          <% if (options.length> 0) { %>
+            <div class="form-group">
+              <% options.forEach(option=> { %>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="menuOption"
+                    id="option-<%= option.menu_option_id %>" value="<%= option.name %>" <%=option.availability==='ไม่มี'
+                    ? 'disabled' : '' %>
+                  required>
+                  <label class="form-check-label" for="option-<%= option.menu_option_id %>">
+                    <span>
+                      <%= option.name %>
+                    </span>
+                    <span class="badge <%= option.availability === 'ไม่มี' ? 'bg-danger' : 'bg-success' %> text-white">
+                      <%= option.availability==='ไม่มี' ? 'หมด' : option.price_adjustment + ' บาท' %>
+                    </span>
+                  </label>
+                </div>
+                <% }) %>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-4 py-2">ยืนยันการเลือก</button>
+            <button type="button" class="btn btn-success w-100 mt-2 py-2" onclick="addToCart('<%= menuItemId %>')">🛒 เพิ่มลงตะกร้า</button>
+            <button type="button" class="btn btn-warning w-100 mt-2 py-2"
+              onclick="window.history.back()">ย้อนกลับ</button>
+            <% } else { %>
+              <p class="text-center text-muted">ไม่มีตัวเลือกสำหรับเมนูนี้</p>
+              <% } %>
+        </form>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+      function addToCart(menu_item_id) {
+        let option = document.querySelector('input[name="menuOption"]:checked');
+        let quantity = 1; // ให้ default เป็น 1 เพราะหน้าเลือกตัวเลือกยังไม่มีตัวเลือกเพิ่มจำนวน
+  
+        if (!option) {
+            Swal.fire("กรุณาเลือกตัวเลือกเมนู!", "", "warning");
+            return;
+        }
+  
+        $.post("/cart/add", { menu_item_id, option_name: option.value, quantity }, function(response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: "success",
+                    title: "เพิ่มลงตะกร้า!",
+                    text: "เมนูถูกเพิ่มลงในตะกร้าเรียบร้อยแล้ว",
+                    showConfirmButton: true,
+                    confirmButtonText: "🛍️ ไปที่ตะกร้า",
+                    showCancelButton: true,
+                    cancelButtonText: "🛒 เลือกเมนูเพิ่ม"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "/cart";
+                    }
+                });
+            } else {
+                Swal.fire("เกิดข้อผิดพลาด!", response.message, "error");
+            }
+        });
+    }
+
+
+      document.addEventListener("DOMContentLoaded", () => {
+        const restaurantId = "<%= restaurant.restaurant_id %>";
+
+        function checkRestaurantStatus() {
+          $.ajax({
+            url: `/api/check-restaurant-status/${restaurantId}`,
+            method: "GET",
+            success: function (data) {
+              if (data.isClosed) {
+                Swal.fire({
+                  icon: "warning",
+                  title: "ร้านค้าปิดแล้ว",
+                  text: "ร้านค้านี้ปิดบริการ กรุณาเลือกร้านค้าอื่น",
+                  confirmButtonText: "ตกลง",
+                  allowOutsideClick: false, // ป้องกันการปิด Popup โดยไม่ได้กดตกลง
+                  timer: 2500  // แสดงแจ้งเตือนแค่ 2.5 วินาทีแล้ว Redirect อัตโนมัติ
+                }).then(() => {
+                  window.location.href = "/restaurant"; // Redirect หลังจากกด "ตกลง"
+                });
+              }
+            },
+            error: function () {
+              console.error("ไม่สามารถเช็คสถานะร้านค้าได้");
+            }
+          });
+        }
+
+        // เช็คสถานะร้านค้าทุกครั้งที่เปิดหน้า
+        checkRestaurantStatus();
+
+        // ตั้งค่าให้เช็คทุก 2 วินาที เพื่อให้เด้งเร็วขึ้น
+        setInterval(checkRestaurantStatus, 2000);
+      });
+    </script>
+    
+
+
+</body>
+
+</html>
