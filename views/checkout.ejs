@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="/css/checkout.css" rel="stylesheet">
+  <title><%= title %></title>
+</head>
+
+<body data-restaurant-id="<%= restaurant ? restaurant.restaurant_id : '' %>">
+
+  <!-- Navbar -->
+  <%- include('partials/navbar') %>
+  <br>
+
+  <div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="row payment-container">
+      
+<!-- QR Code Section -->
+<div class="col-md-6 qr-section">
+  <br>
+  <h2 class="text-primary mb-4">QRCode ชำระเงิน</h2>
+
+  <!-- ข้อความเน้นย้ำให้โอนเงินตรงยอดรวม -->
+  <h4 class="text-center text-danger fw-bold">
+      ห้ามโอนเกิน | ห้ามโอนขาด 
+      <br>
+      กรุณาโอน <%= totalPrice.toFixed(2) %> บาท เท่านั้น!!
+  </h4>
+
+  <img src="<%= qrCodeImage || '/images/default-qrcode.png' %>" alt="QR Code ของร้านค้า" id="qrCodeImage" class="img-fluid">
+  
+  <p class="text-muted mt-1 text-center fw-bold">
+    ✅ โอนเงินให้ตรงกับยอดสินค้าเป๊ะๆ<br>
+    ❌ หากยอดเงินไม่ตรง หรือชื่อบัญชีปลายทางไม่ถูกต้อง <br>
+    **ระบบจะไม่สามารถตรวจสอบสลิปได้ และออเดอร์ของคุณจะไม่ดำเนินการ**
+  </p>
+  
+  <button class="btn btn-success w-100 mt-3" onclick="downloadQRCode()">📥 บันทึก QR Code</button>
+  
+  <p class="capture-note mt-3 text-center text-muted">กดบันทึกไม่ได้ แคปหน้าจอแทน</p>
+</div>
+
+      <!-- Upload Section -->
+      <div class="col-md-6 upload-section">
+        <h5>อัปโหลดสลิปการชำระเงิน</h5>
+        <form id="uploadSlipForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label for="paymentSlip" class="form-label">เลือกไฟล์สลิป:</label>
+            <input class="form-control" type="file" id="paymentSlip" name="paymentSlip" accept="image/*" required>
+            <small class="form-text text-muted">
+              ขนาดไฟล์ต้องไม่เกิน 3MB และเป็นรูปภาพเท่านั้น
+            </small>
+          </div>
+          <button type="button" class="btn btn-primary btn-upload mt-3" onclick="uploadSlip()">เช็คสลิป</button>
+          <button type="button" class="btn btn-warning w-100 mt-2 py-2" onclick="window.history.back()">ย้อนกลับ</button>
+        </form>
+        <p class="text-danger text-center fw-bold mt-4">
+          ⏳ สลิปต้องอัปโหลดภายใน 15 นาทีหลังโอนเงิน มิฉะนั้น ระบบจะไม่รับสลิปนี้ ⏳
+      </p>
+      </div>
+      
+      
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    async function checkRestaurantStatus() {
+      const restaurantId = document.body.getAttribute("data-restaurant-id");
+  
+      if (!restaurantId || restaurantId === "null" || restaurantId === "undefined") {
+        console.error("ไม่พบ restaurantId");
+        return;
+      }
+  
+      try {
+        const response = await fetch(`/api/check-restaurant-status/${restaurantId}`);
+        const data = await response.json();
+        console.log("API เช็คสถานะร้านค้า:", data);
+  
+        if (data.isClosed) {
+          console.log("ร้านค้าปิด -> แสดง SweetAlert2 และ Redirect");
+          Swal.fire({
+            icon: "warning",
+            title: "ร้านค้าปิดแล้ว",
+            text: "ร้านค้านี้ปิดบริการ กรุณาเลือกร้านค้าอื่น",
+            confirmButtonText: "ตกลง"
+          }).then(() => {
+            history.replaceState(null, "", "/restaurant");
+            window.location.href = "/restaurant";
+          });
+  
+          // ปิดปุ่มอัปโหลดสลิปถ้าร้านปิด
+          document.querySelectorAll(".btn-upload").forEach(btn => btn.setAttribute("disabled", "true"));
+          document.getElementById("paymentSlip").setAttribute("disabled", "true");
+        }
+      } catch (error) {
+        console.error("ไม่สามารถเช็คสถานะร้านค้าได้:", error);
+      }
+    }
+  
+    async function uploadSlip() {
+      let formData = new FormData();
+      let fileInput = document.getElementById("paymentSlip");
+      let restaurantId = document.body.getAttribute("data-restaurant-id");
+      let accountId = "<%= user ? user.id : '' %>";
+  
+      console.log("ค่าที่ดึงจาก Session:");
+      console.log("restaurantId:", restaurantId);
+      console.log("accountId:", accountId);
+  
+      if (!restaurantId || restaurantId === "null" || restaurantId === "undefined") {
+        Swal.fire("แจ้งเตือน", "เกิดข้อผิดพลาด! ไม่พบข้อมูลร้านค้า", "error");
+        return;
+      }
+  
+      if (!accountId || accountId === "" || accountId === "undefined") {
+        Swal.fire("แจ้งเตือน", "เกิดข้อผิดพลาด! ไม่พบข้อมูลบัญชีผู้ใช้", "error");
+        return;
+      }
+  
+      if (fileInput.files.length === 0) {
+        Swal.fire("แจ้งเตือน", "กรุณาเลือกไฟล์สลิป", "warning");
+        return;
+      }
+  
+      let file = fileInput.files[0];
+      if (!file.type.startsWith("image/")) {
+        Swal.fire("แจ้งเตือน", "กรุณาอัปโหลดเฉพาะไฟล์รูปภาพ!", "error");
+        return;
+      }
+  
+      formData.append("paymentSlip", file);
+      formData.append("restaurantId", restaurantId);
+      formData.append("accountId", accountId);
+  
+      console.log("กำลังอัปโหลดสลิปไปยัง API...");
+      console.log("restaurantId:", restaurantId);
+      console.log("accountId:", accountId);
+  
+      try {
+        const response = await fetch("/upload-slip", { method: "POST", body: formData });
+        const data = await response.json();
+        console.log("API Response:", data);
+  
+        if (data.success) {
+          Swal.fire({
+            title: "สำเร็จ!",
+            text: "ระบบตรวจสอบสลิปเรียบร้อยแล้ว",
+            icon: "success",
+            confirmButtonText: "ตกลง"
+          }).then(() => {
+            window.location.href = "/order-success";
+          });
+        } else {
+          Swal.fire("เกิดข้อผิดพลาด!", data.message, "error");
+        }
+      } catch (error) {
+        console.error("Fetch Error:", error);
+        Swal.fire("เกิดข้อผิดพลาด!", "ไม่สามารถอัปโหลดไฟล์ได้ โปรดลองใหม่", "error");
+      }
+    }
+  
+    document.addEventListener("DOMContentLoaded", () => {
+      checkRestaurantStatus(); // เช็คสถานะร้านค้าทันทีที่เปิดหน้า
+      setInterval(checkRestaurantStatus, 2000); // เช็คซ้ำทุก 2 วินาที
+    });
+
+
+    function downloadQRCode() {
+      const qrImage = document.getElementById("qrCodeImage");
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      const img = new Image();
+
+      img.crossOrigin = "anonymous"; // เพื่อป้องกันปัญหาหากใช้แหล่งที่มาจากภายนอก
+      img.src = qrImage.src;
+
+      img.onload = function () {
+          // กำหนดขนาดของ canvas ให้ตรงกับขนาดของภาพ
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+
+          // แปลง canvas เป็น Blob
+          canvas.toBlob(function (blob) {
+              const link = document.createElement("a");
+              const url = URL.createObjectURL(blob); // สร้าง URL สำหรับ Blob
+              link.href = url;
+              link.download = "qrcode.png"; // กำหนดชื่อไฟล์ที่ดาวน์โหลด
+              document.body.appendChild(link);
+              link.click(); // กดลิงค์เพื่อดาวน์โหลด
+              document.body.removeChild(link); // ลบลิงค์หลังจากคลิก
+              URL.revokeObjectURL(url); // ลบ URL ที่สร้างขึ้น
+          }, "image/png"); // กำหนดประเภทไฟล์เป็น PNG
+      };
+  }
+  
+  </script>
+  
+
+</body>
+</html>

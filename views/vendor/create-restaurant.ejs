@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="/css/create-restaurant.css" rel="stylesheet" />
+  <title>
+    <%= title %>
+  </title>
+</head>
+
+<body>
+  <%- include('../partials/navbar') %>
+
+    <main class="container mt-5">
+      <h1 class="text-center mb-4">สร้างร้านค้าใหม่</h1>
+      <div class="form-container">
+        <form action="/vendor/create-restaurant" method="POST" enctype="multipart/form-data"
+          onsubmit="return validateForm();">
+          <div class="mb-3">
+            <label for="name" class="form-label">ชื่อร้าน</label>
+            <input type="text" class="form-control" id="name" name="name" maxlength="50" required
+              placeholder="เช่น ร้านอาหารตามสั่ง กอไก่" />
+            <div class="form-text">กรุณากรอกชื่อร้าน ไม่เกิน 50 ตัวอักษร</div>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label">คำอธิบายร้าน</label>
+            <input type="text" class="form-control" id="description" name="description" maxlength="50" required
+              placeholder="ตัวอย่าง: ร้านอาหารไทย ตามสั่ง" />
+            <div class="form-text">
+              กรุณากรอกคำอธิบายร้าน ไม่เกิน 50 ตัวอักษร
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="address" class="form-label">ที่อยู่</label>
+            <input type="text" class="form-control" id="address" name="address" maxlength="50" required
+              placeholder="เช่น ตึกไดโนชั้น 3 ล็อก 4" />
+            <div class="form-text">กรุณากรอกที่อยู่ ไม่เกิน 50 ตัวอักษร</div>
+          </div>
+          <div class="mb-3">
+            <label for="phone" class="form-label">เบอร์โทรศัพท์</label>
+            <input type="tel" class="form-control" id="phone" name="phone" pattern="[0-9]{10}" maxlength="10" required
+              placeholder="ตัวอย่าง: 0812345678" onkeypress="return isNumberKey(event)" />
+            <div class="form-text">
+              กรุณากรอกเบอร์โทร 10 หลัก (ตัวเลขเท่านั้น)
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="qrcode" class="form-label">QR Code สำหรับจ่าเงิน</label>
+            <input type="file" class="form-control" id="qrcode" name="qrcode" accept="image/*"
+              onchange="validateImage(event)" />
+            <div class="form-text">
+              อัปโหลดเฉพาะรูปภาพ ขนาดไฟล์ต้องไม่เกิน 3MB
+            </div>
+            <img id="qrcode-preview" class="img-preview" src="#" alt="ตัวอย่าง QR Code"
+              style="display: none; max-width: 100%; max-height: 300px" />
+          </div>
+          <button type="submit" class="btn btn-primary w-100">
+            บันทึกข้อมูล
+          </button>
+          <a href="/vendor/dashboard" class="btn btn-secondary w-100 mt-2">ยกเลิก</a>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      // อนุญาตให้พิมพ์เฉพาะตัวเลข
+      function isNumberKey(evt) {
+        const charCode = evt.which ? evt.which : evt.keyCode;
+        return charCode >= 48 && charCode <= 57; // รับเฉพาะตัวเลข 0-9
+      }
+
+      // ตรวจสอบรูปภาพ QR Code
+      function validateImage(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById("qrcode-preview");
+        const maxSize = 3 * 1024 * 1024; // 3MB
+
+        if (file && file.size > maxSize) {
+          alert("ไฟล์มีขนาดเกิน 3MB กรุณาอัปโหลดไฟล์ที่เล็กกว่านี้");
+          event.target.value = ""; // รีเซ็ตค่า input
+          preview.style.display = "none";
+          return;
+        }
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.style.display = "block";
+          };
+          reader.readAsDataURL(file);
+        } else {
+          preview.style.display = "none";
+        }
+      }
+
+      // ตรวจสอบฟอร์มทั้งหมดก่อนส่ง
+      function validateForm() {
+        const phone = document.getElementById("phone").value;
+        if (phone.length !== 10) {
+          alert("กรุณากรอกเบอร์โทร 10 หลัก");
+          return false;
+        }
+        return true;
+      }
+    </script>
+</body>
+
+</html>

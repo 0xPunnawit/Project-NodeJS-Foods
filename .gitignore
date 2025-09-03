@@ -1,0 +1,28 @@
+# Node modules - ไม่จำเป็นต้องติดตาม เพราะสามารถติดตั้งใหม่ได้
+node_modules/
+
+# Log files - ไฟล์บันทึกที่ไม่ได้ใช้ในการพัฒนา
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# ไฟล์และโฟลเดอร์ที่ใช้เก็บตัวแปรสภาพแวดล้อม
+.env
+
+# ไฟล์ที่สร้างโดย IDE หรือ Text Editor
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Output build หรือ dist ที่เกิดจากการคอมไพล์โปรเจค
+dist/
+build/
+
+# Temporary files
+*.log
+*.tmp
+
+# คอนฟิกของระบบ OS
+*.swp
+*.swo

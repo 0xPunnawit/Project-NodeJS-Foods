@@ -1,0 +1,93 @@
+body {
+  background-color: #f8f9fa;
+  /* พื้นหลัง */
+}
+
+.card {
+  border-radius: 15px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 80vh; /* ✅ จำกัดความสูง ไม่ให้เกิน 80% ของหน้าจอ */
+  overflow-y: auto; /* ✅ เพิ่มการเลื่อนขึ้น-ลง */
+  width: 100%;
+  max-width: 400px;
+}
+
+.card-title {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #007bff;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.form-check:hover {
+  background-color: #f1f1f1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-check-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.form-check-input {
+  transform: scale(1.2);
+  margin-right: 15px;
+}
+
+.form-check-input:disabled~.form-check-label {
+  color: #aaa;
+}
+
+.btn-primary {
+  font-size: 1.2rem;
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #004085;
+}
+
+.btn-warning {
+  font-size: 1.2rem;
+  background-color: #ffc107;
+  border-color: #ffc107;
+}
+
+.btn-warning:hover {
+  background-color: #e0a800;
+  border-color: #d39e00;
+}
+
+@media (max-width: 768px) {
+  .container {
+    align-items: flex-start !important; /* ✅ ปรับให้เนื้อหาขึ้นต้นของหน้าจอ */
+    padding-top: 20px;
+  }
+
+  .card {
+    max-height: 70vh; /* ✅ ลดความสูงลงสำหรับมือถือ */
+  }
+
+  .form-check-label {
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    font-size: 1rem;
+  }
+}

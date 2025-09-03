@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/login.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> <!-- เพิ่ม SweetAlert2 -->
+  <title>
+    <%= title %>
+  </title>
+</head>
+
+<body class="text-center">
+  <!-- เรียกใช้ Navbar -->
+  <%- include('./partials/navbar') %> <!-- ระบุเส้นทางให้ชัดเจน -->
+
+    <main class="form-signin w-100 m-auto">
+      <form action="/login" method="POST">
+        <img class="mb-4" src="/images/logo-pbru.png" alt="PBRU Logo" width="90" height="90">
+        <h1 class="h3 mb-3 fw-normal">กรุณาล็อกอิน</h1>
+
+        <div class="form-floating mb-3">
+          <input type="email" class="form-control" id="floatingInput" name="email" placeholder="name@example.com"
+            value="<%= email %>" required>
+          <label for="floatingInput">อีเมล</label>
+        </div>
+        <div class="form-floating mb-3">
+          <input type="password" class="form-control" id="floatingPassword" name="password" placeholder="Password"
+            required>
+          <label for="floatingPassword">รหัสผ่าน</label>
+        </div>
+
+        <button class="w-100 btn btn-lg btn-primary" type="submit">เข้าสู่ระบบ</button>
+
+        <!-- ปุ่ม "สมัครสมาชิก" -->
+        <a href="/register" class="w-100 btn btn-warning mt-4">สมัครสมาชิก</a>
+
+        <p class="mt-5 mb-3 text-muted">© 2025 | PBRU IT</p>
+      </form>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <% if (errorMessage) { %>
+      <script>
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: '<%= errorMessage %>',
+          timer: 4000,               // ตั้งเวลา 5 วินาที
+          timerProgressBar: true,    // แสดงหลอดโหลด
+          confirmButtonText: 'ลองใหม่อีกครั้ง'
+        });
+      </script>
+      <% } %>
+</body>
+
+</html>

@@ -1,0 +1,94 @@
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">
+      <img src="/images/logo-pbru.png" alt="PBRU Logo" width="40" height="40" />
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <% if (user) { %>
+          <!-- แสดงชื่อผู้ใช้ด้านบนสุด -->
+          <li class="nav-item">
+            <a class="nav-link active"><i class="fa-regular fa-user">:</i>
+              <%= user.name %>
+            </a>
+          </li>
+
+          <!-- เมนูสำหรับผู้ใช้ที่ล็อกอิน -->
+          <li class="nav-item">
+            <a class="nav-link active" href="/"><i class="fa-solid fa-house-chimney"></i> หน้าหลัก</a>
+          </li>
+
+          <% if (!user.role) { %>
+            <!-- กรณีผู้ใช้ล็อกอินแต่ไม่มียศ -->
+            <li class="nav-item">
+              <a class="nav-link active" href="/restaurant"><i class="fa-solid fa-store"></i> ดูร้านอาหาร</a>
+            </li>
+
+            <% } %>
+              <% if (user.role==='admin' ) { %>
+                <!-- กรณีผู้ใช้ล็อกอินด้วยยศ admin -->
+                <li class="nav-item">
+                  <a class="nav-link active" href="/admin/dashboard">แดชบอร์ดแอดมิน</a>
+                </li>
+
+                <% } %>
+                  <% if (user.role==='vendor' ) { %>
+                    <!-- กรณีผู้ใช้ล็อกอินด้วยยศ vendor -->
+                    <li class="nav-item">
+                      <a class="nav-link active" href="/vendor/dashboard">จัดการร้านค้า</a>
+                    </li>
+                    <li class="nav-item">
+                      <a class="nav-link active" href="/vendor/receive-orders">ดูรายการออเดอร์</a>
+                    </li>
+
+                    <% } %>
+                      <% if (user.role==='customer' ) { %>
+                        <!-- กรณีผู้ใช้ล็อกอินด้วยยศ customer -->
+                        <li class="nav-item">
+                          <a class="nav-link active" href="/restaurant"><i class="fa-solid fa-store"></i>
+                            ดูร้านอาหาร</a>
+                        </li>
+
+                        <li class="nav-item">
+                          <a class="nav-link active" href="/orders"><i class="fa-solid fa-clipboard-list"></i>
+                            ดูรายการสั่งซื้อ</a>
+                        </li>
+
+                        <li class="nav-item">
+                          <a class="nav-link active" href="/cart"><i class="fa-solid fa-clipboard-list"></i>
+                            ตะกร้า</a>
+                        </li>
+
+                        <% } %>
+
+                          <!-- เมนูออกจากระบบ -->
+                          <li class="nav-item">
+                            <a class="nav-link active" href="/logout"><i class="fa-solid fa-right-from-bracket"></i>
+                              ออกจากระบบ</a>
+                          </li>
+
+                          <% } else { %>
+                            <!-- เมนูสำหรับผู้ใช้ที่ยังไม่ได้ล็อกอิน -->
+                            <li class="nav-item">
+                              <a class="nav-link active" href="/login"><i class="fa-solid fa-right-to-bracket"></i>
+                                ล็อกอิน</a>
+                            </li>
+                            <li class="nav-item">
+                              <a class="nav-link active" href="/register"><i class="fa-regular fa-address-card"></i>
+                                สมัครสมาชิก</a>
+                            </li>
+                            <li class="nav-item">
+                              <a class="nav-link active" href="/restaurant"><i class="fa-solid fa-store"></i>
+                                ดูร้านอาหาร</a>
+                            </li>
+                            <% } %>
+      </ul>
+    </div>
+  </div>
+</nav>

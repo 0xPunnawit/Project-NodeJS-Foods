@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <link href="/css/order-summary.css" rel="stylesheet">
+  <title>
+    <%= title %>
+  </title>
+</head>
+
+<body data-restaurant-id="<%= restaurant ? restaurant.restaurant_id : '' %>">
+
+  <!-- Navbar -->
+  <%- include('partials/navbar') %>
+    <br>
+
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+      <div class="card w-100" style="max-width: 500px;">
+        <div class="header-bg">
+          <h3 class="card-title">สรุปเมนูรายการ</h3>
+        </div>
+        <div class="card-body">
+          <% if (selectedItem) { %>
+            <ul class="list-group mb-4">
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>เมนู:</strong>
+                <span>
+                  <%= selectedItem.menu_name || 'ไม่พบข้อมูล' %>
+                </span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>ราคา:</strong>
+                <span id="basePrice">
+                  <%= selectedItem.base_price || 0 %> บาท
+                </span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>เพิ่มจากตัวเลือก:</strong>
+                <span id="optionPrice">
+                  <%= selectedItem.option_name || '-' %>
+                    <%= selectedItem.price_adjustment || 0 %> บาท
+                </span>
+              </li>
+              <li class="list-group-item d-flex justify-content-between align-items-center">
+                <strong>จำนวน (สูงสุด 3):</strong>
+                <div class="input-group" style="width: 130px;">
+                  <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(-1)">-</button>
+                  <input type="text" id="quantity" class="form-control text-center" value="1" readonly>
+                  <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(1)">+</button>
+                </div>
+              </li>
+              <li class="list-group-item">
+                <strong>หมายเหตุเพิ่มเติม:</strong>
+                <textarea id="orderNote" class="form-control mt-2" maxlength="50"
+                  placeholder="ไม่เผ็ด, ไม่ใส่ผัก (สูงสุด 50 ตัวอักษร)"></textarea>
+              </li>
+
+
+            </ul>
+            <p class="text-muted text-center" style="font-size: 0.9em;">กรุณาโอนเงินให้ตรงกับยอดสั่งซื้อที่ระบุ</p>
+            <h4 class="text-center">ยอดรวม: <span id="totalPrice">
+                <%= totalPrice || (selectedItem.base_price + (selectedItem.price_adjustment || 0)) %>
+              </span> บาท</h4>
+            <div class="text-center mt-4">
+              <a id="checkoutBtn" href="/restaurant/<%= restaurant ? restaurant.restaurant_id : '' %>/qrcode"
+                class="btn btn-success w-100 mt-3 py-2">ดำเนินการชำระเงิน</a>
+              <button type="button" class="btn btn-warning w-100 mt-2 py-2"
+                onclick="window.history.back()">ย้อนกลับ</button>
+            </div>
+            <% } else { %>
+              <p class="text-center text-danger">ไม่พบข้อมูลสินค้า กรุณากลับไปเลือกเมนูใหม่</p>
+              <a href="/restaurant" class="btn btn-warning w-100 mt-2 py-2">กลับไปที่ร้านค้า</a>
+              <% } %>
+        </div>
+      </div>
+    </div>
+
+    <script>
+
+      function changeQuantity(diff) {
+        const quantityInput = document.getElementById("quantity");
+        let quantity = parseInt(quantityInput.value) || 1;
+
+        // ปรับค่าตามปุ่มที่กด
+        quantity += diff;
+
+        // จำกัดค่าให้อยู่ระหว่าง 1 - 3
+        if (quantity < 1) quantity = 1;
+        if (quantity > 3) quantity = 3;
+
+        quantityInput.value = quantity;
+        updateTotal();
+      }
+
+      function updateTotal() {
+        let quantity = parseInt(document.getElementById("quantity").value) || 1;
+
+        let basePrice = parseFloat(<%= selectedItem.base_price || 0 %>);
+        let optionPrice = parseFloat(<%= selectedItem.price_adjustment || 0 %>);
+        let total = (basePrice + optionPrice) * quantity;
+
+        document.getElementById("totalPrice").innerText = total.toFixed(2) + " บาท";
+
+        let checkoutBtn = document.getElementById("checkoutBtn");
+        checkoutBtn.dataset.quantity = quantity;
+        checkoutBtn.dataset.totalPrice = total.toFixed(2);
+      }
+
+      function sendOrderToServer() {
+        let checkoutBtn = document.getElementById("checkoutBtn");
+        let quantity = checkoutBtn.dataset.quantity || 1;
+        let totalPrice = checkoutBtn.dataset.totalPrice || "0.00";
+        let orderNote = document.getElementById("orderNote").value.trim(); // ดึงค่าหมายเหตุ
+
+        let orderData = {
+          quantity: parseInt(quantity),
+          totalPrice: parseFloat(totalPrice),
+          note: orderNote
+        };
+
+        console.log("[DEBUG] กำลังส่งข้อมูลไป Backend:", orderData); // Log เพื่อดูค่าที่ถูกส่ง
+
+        fetch("/update-order-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(orderData)
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log("[DEBUG] คำตอบจาก Backend:", data); // Log Response จาก Backend
+
+            if (data.success) {
+              console.log("[DEBUG] อัปเดต session สำเร็จ:", data.order);
+              let restaurantId = "<%= restaurant ? restaurant.restaurant_id : '' %>";
+              window.location.href = `/restaurant/${restaurantId}/qrcode`;
+            } else {
+              console.error("[DEBUG] ไม่สามารถอัปเดต session ได้:", data);
+            }
+          })
+          .catch(error => console.error("[DEBUG] Error:", error));
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("checkoutBtn").addEventListener("click", (e) => {
+          e.preventDefault();
+          sendOrderToServer();
+        });
+
+        checkRestaurantStatus(); // เช็คสถานะร้านค้าทุกครั้งที่เปิดหน้า
+        setInterval(checkRestaurantStatus, 2000); // ตั้งให้เช็คทุก 2 วินาที
+      });
+
+      function checkRestaurantStatus() {
+        const restaurantId = document.body.getAttribute("data-restaurant-id");
+
+        $.ajax({
+          url: `/api/check-restaurant-status/${restaurantId}`,
+          method: "GET",
+          success: function (data) {
+            if (data.isClosed) {
+              Swal.fire({
+                icon: "warning",
+                title: "ร้านค้าปิดแล้ว",
+                text: "ร้านค้านี้ปิดบริการ กรุณาเลือกร้านค้าอื่น",
+                confirmButtonText: "ตกลง"
+              }).then(() => {
+                window.location.href = "/restaurant";
+              });
+            }
+          },
+          error: function () {
+            console.error("ไม่สามารถเช็คสถานะร้านค้าได้");
+          }
+        });
+      }
+
+      window.onload = updateTotal;
+    </script>
+
+
+</body>
+
+</html>

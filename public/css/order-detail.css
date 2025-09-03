@@ -1,0 +1,72 @@
+.order-detail-card {
+  max-width: 800px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.order-id, .restaurant-name {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.menu-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.menu-info {
+  font-size: 1.1rem;
+}
+
+.menu-option {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.price-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.base-price, .option-price {
+  font-size: 1rem;
+}
+
+.menu-total {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #d9534f;
+}
+
+.order-status {
+  font-size: 1.1rem;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.total-price {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+@media (max-width: 576px) {
+  .order-detail-card {
+    padding: 15px;
+  }
+  .order-status {
+    font-size: 1rem;
+  }
+  .menu-info {
+    font-size: 1rem;
+  }
+}

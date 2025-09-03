@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/restaurant-detail.css" rel="stylesheet">
+
+  <title><%= title %></title>
+</head>
+<body data-restaurant-id="<%= restaurant ? restaurant.restaurant_id : '' %>">
+
+  <!-- Navbar -->
+  <%- include('partials/navbar') %>
+  <br>
+  <main class="container mt-5">
+    <!-- Card ส่วนแสดงรายละเอียดร้านอาหาร -->
+    <div class="card mx-auto" style="max-width: 600px;">
+      <div class="card-header bg-primary text-white">
+        <h2 class="card-title m-0 text-center"><%= restaurant.name %></h2>
+      </div>
+      <div class="card-body">
+        <p class="mb-3">
+          <strong>สถานะ:</strong> 
+          <span class="<%= restaurant.status === 'เปิดร้าน' ? 'status-open' : 'status-closed' %>">
+            <%= restaurant.status === 'เปิดร้าน' ? 'เปิดร้าน 🟢' : 'ปิดบริการ 🔴' %>
+          </span>
+        </p>
+        <p class="mb-3">
+          <strong>ที่อยู่:</strong> <%= restaurant.address %>
+        </p>
+        <p class="mb-3">
+          <strong>เบอร์โทรศัพท์:</strong> <%= restaurant.phone %>
+        </p>
+        <p class="mb-3">
+          <strong>รายละเอียด:</strong> <%= restaurant.description %>
+        </p>
+      </div>
+      <div class="card-footer text-center">
+        <a href="/restaurant" class="btn btn-warning">ย้อนกลับ</a>
+      </div>
+    </div>
+
+<!-- แสดงเมนูของร้าน -->
+<div class="container mt-5">
+  <h3 class="mb-4 text-center">เมนูร้านอาหาร</h3>
+  <div class="row">
+    <% if (menus && menus.length > 0) { %>
+      <% menus.forEach(menu => { %>
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title"><%= menu.name %></h5>
+            <p class="card-text">ราคา: <%= menu.price %> บาท</p>
+            <p class="card-text"><%= menu.availability === 'มี' ? 'พร้อมให้บริการ' : 'ไม่พร้อมให้บริการ' %></p>
+            <img src="<%= menu.menu_img || '/images/default-menu.jpg' %>" 
+                alt="รูปภาพ <%= menu.name %>" 
+                class="card-img-top img-fluid" 
+                style="max-height: 200px; object-fit: cover; border-radius: 10px 10px 0 0;">
+            <% if (restaurant.status === 'เปิดร้าน') { %>
+              <% if (menu.availability === 'มี') { %>
+                <a href="/menu/<%= menu.menu_item_id %>/options" class="btn btn-primary mt-3">เลือกสินค้า</a>
+              <% } else { %>
+                <button class="btn btn-secondary mt-3" disabled>ไม่พร้อมให้บริการ</button>
+              <% } %>
+            <% } else { %>
+              <button class="btn btn-danger mt-3" disabled>ร้านปิดบริการ</button>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <% }) %>
+    <% } else { %>
+      <p class="text-center text-muted">ไม่มีเมนูในร้านนี้</p>
+    <% } %>
+  </div>
+</div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const restaurantId = "<%= restaurant.restaurant_id %>";
+      console.log("ตรวจสอบสถานะร้านค้า ID:", restaurantId);
+  
+      async function checkRestaurantStatus() {
+        try {
+          const response = await fetch(`/api/check-restaurant-status/${restaurantId}`);
+          const data = await response.json();
+          console.log("API Response:", data);
+  
+          if (data.isClosed) {
+            console.log("ร้านปิด -> แสดง SweetAlert2 เร็วขึ้น!");
+            Swal.fire({
+              icon: "warning",
+              title: "ร้านค้าปิดแล้ว",
+              text: "ร้านค้านี้ปิดบริการ กรุณาเลือกร้านค้าอื่น",
+              confirmButtonText: "ตกลง",
+              allowOutsideClick: false,  // ป้องกันการปิด Popup โดยไม่ได้กดตกลง
+              timer: 2500  // แสดงแจ้งเตือนแค่ 2.5 วินาทีแล้ว Redirect อัตโนมัติ
+            }).then(() => {
+              window.location.href = "/restaurant";
+            });
+          }
+        } catch (error) {
+          console.error("ไม่สามารถเช็คสถานะร้านค้าได้:", error);
+        }
+      }
+  
+      // เรียก API ทันทีที่โหลดหน้า (ลดดีเลย์)
+      checkRestaurantStatus();
+  
+      // เช็คซ้ำทุก 2 วินาที แทนที่จะเป็น 5 วินาที
+      setInterval(checkRestaurantStatus, 2000);
+    });
+  </script>
+  
+  
+  
+</body>
+</html>

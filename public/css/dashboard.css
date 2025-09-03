@@ -1,0 +1,42 @@
+
+main {
+    padding-top: 70px;
+  }
+  
+  .restaurant-card {
+    max-width: 600px;
+    margin: auto;
+  }
+  
+  .btn-lg {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+  
+  .status-indicator {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+  
+  /* ✅ ปรับ QR Code ให้ดูดีขึ้น */
+  .qr-code-img {
+    width: 100%; /* ขยายเต็ม container */
+    max-width: 350px; /* กำหนดขนาดสูงสุด */
+    height: auto; /* คงอัตราส่วน */
+    border: 2px solid #ddd; /* ขอบเล็กน้อย */
+    border-radius: 10px;
+    padding: 10px;
+    background: #fff;
+    display: block; /* ทำให้ QR Code อยู่ตรงกลาง */
+    margin: 20px auto; /* เพิ่ม margin ด้านบน */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* เพิ่มเงาเบาๆ */
+  }
+  
+  /* ✅ Responsive สำหรับมือถือ */
+  @media (max-width: 576px) {
+    .qr-code-img {
+      max-width: 250px; /* ลดขนาดลงสำหรับมือถือ */
+      padding: 5px;
+    }
+  }
+  

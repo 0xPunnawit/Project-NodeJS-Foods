@@ -1,0 +1,72 @@
+body {
+    padding-top: 20px;
+    background-color: #f8f9fa;
+  }
+
+  .payment-container {
+    max-width: 800px;
+    margin: auto;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+
+  .qr-section,
+  .upload-section {
+    padding: 20px;
+  }
+
+  .qr-section {
+    text-align: center;
+    border-right: 1px solid #ddd;
+  }
+
+  .qr-section img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+
+  .upload-section h5 {
+    margin-bottom: 20px;
+    font-weight: bold;
+  }
+
+  .btn-upload {
+    width: 100%;
+    font-size: 1.2rem;
+  }
+
+  .btn-back {
+    width: 100%;
+    font-size: 1.2rem;
+  }
+  
+  .capture-note {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #d9534f; /* สีแดงสำหรับข้อความเตือน */
+    background-color: #f8d7da; /* พื้นหลังสีชมพูอ่อน */
+    padding: 15px;
+    border-radius: 5px;
+    text-align: center;
+    margin-top: 10px;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* เพิ่มการจัดวางให้น่าสนใจ */
+.qr-section button {
+    width: 100%;
+    font-size: 1.1rem;
+    padding: 12px;
+    margin-top: 10px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.qr-section button:hover {
+    background-color: #28a745; /* เปลี่ยนสีเมื่อ hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}

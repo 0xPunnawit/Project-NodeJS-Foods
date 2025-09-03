@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <title>
+    <%= title %>
+  </title>
+</head>
+
+<body>
+  <script>
+    Swal.fire({
+      icon: 'error',
+      title: '404 - ไม่พบหน้านี้',
+      text: '<%= message %>', // แสดงข้อความที่ส่งจาก server (dynamic)
+      timer: 3000, // ตั้งเวลา 3 วินาที
+      timerProgressBar: true,
+      showConfirmButton: false // ไม่แสดงปุ่มยืนยัน
+    }).then(() => {
+      window.location.href = '/'; // กลับไปหน้าแรก
+    });
+  </script>
+</body>
+
+</html>

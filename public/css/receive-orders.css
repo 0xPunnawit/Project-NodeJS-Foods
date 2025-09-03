@@ -1,0 +1,109 @@
+body {
+    background-color: #f8f9fa;
+}
+.status-indicator {
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+.status-waiting {
+    background-color: #ffc107;
+    color: black;
+}
+.status-cooking {
+    background-color: #17a2b8;
+    color: white;
+}
+.status-success {
+    background-color: #28a745;
+    color: white;
+}
+.status-danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-detail {
+    font-size: 0.85rem;
+    padding: 5px 10px;
+}
+.order-details {
+    display: none;
+    margin-top: 10px;
+    background: #f1f1f1;
+    padding: 10px;
+    border-radius: 8px;
+}
+.order-detail-header {
+    background: #444;
+    color: white;
+    padding: 10px;
+    border-radius: 8px 8px 0 0;
+}
+
+@media (max-width: 768px) {
+    .swal2-html-container table {
+        font-size: 12px; /* ลดขนาดฟอนต์สำหรับหน้าจอเล็ก */
+    }
+
+    .swal2-html-container td, .swal2-html-container th {
+        padding: 5px; /* ลดระยะห่างในตาราง */
+    }
+
+    /* ทำให้ .order-header และ .order-body เป็นแบบ flex */
+    .order-header {
+        display: flex; /* ใช้ flex */
+        flex-direction: column; /* จัดเรียงองค์ประกอบในแนวตั้ง */
+        align-items: flex-start; /* เรียงไอเทมเริ่มต้นจากด้านซ้าย */
+    }
+
+    .order-body {
+        display: flex; /* ใช้ flex */
+        flex-direction: column; /* จัดเรียงองค์ประกอบในแนวตั้ง */
+        gap: 5px; /* กำหนดระยะห่างระหว่างไอเทม */
+    }
+}
+
+
+/* ปรับความกว้างของคอลัมน์ */
+.table-container table {
+    width: 100%;
+    table-layout: fixed; /* กำหนดให้ตารางมีขนาดคงที่ */
+}
+
+/* กำหนดความกว้างของคอลัมน์ */
+.table-container th:nth-child(1), 
+.table-container td:nth-child(1) { 
+    width: 8%; /* ทำให้เลขออเดอร์เล็กลง */
+    text-align: center;
+}
+
+.table-container th:nth-child(2), 
+.table-container td:nth-child(2) { 
+    width: 20%; /* ปรับความกว้างของเมนู */
+    text-align: left;
+    padding-left: 10px;
+}
+
+.table-container th:nth-child(3), 
+.table-container td:nth-child(3) { 
+    width: 10%;
+}
+
+.table-container th:nth-child(4), 
+.table-container td:nth-child(4) { 
+    width: 12%;
+}
+
+.table-container th:nth-child(5), 
+.table-container td:nth-child(5) { 
+    width: 12%;
+}
+
+/* ปรับปรุงให้ตัวเลือกเมนูขยับเข้ามาใกล้ขึ้น */
+td:nth-child(2) {
+    word-wrap: break-word; /* ตัดคำถ้าหากเมนูยาวเกิน */
+    overflow-wrap: break-word; /* รองรับ browser ที่ใช้ CSS ล่าสุด */
+}

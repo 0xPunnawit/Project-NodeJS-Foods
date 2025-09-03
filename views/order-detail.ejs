@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+  <link href="/css/order-detail.css" rel="stylesheet">
+  <title>รายละเอียดคำสั่งซื้อ</title>
+</head>
+
+<body>
+  <%- include('partials/navbar') %>
+  <br>
+  <div class="container mt-5">
+    <div class="card order-detail-card shadow">
+      <div class="card-body">
+        <h2 class="text-center mb-4">📦 รายละเอียดคำสั่งซื้อ</h2>
+
+        <h5><i class="fa-solid fa-store"></i> ร้านค้า: <strong><%= order.restaurant_name %></strong></h5>
+        <p><i class="fa-solid fa-receipt"></i> หมายเลขคำสั่งซื้อ: <strong>#<%= order.order_id %></strong></p>
+
+        <hr>
+
+        <h5>🛒 รายการเมนูที่สั่ง</h5>
+        <ul class="list-group">
+          <% items.forEach(item => { %>
+            <li class="list-group-item">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <strong><%= item.menu_name %></strong> (<%= item.quantity %>x)
+        
+                  <div class="text-muted">💰 ราคาเมนู: <%= item.base_price %> บาท</div> <!-- ใช้ price จาก menu_items -->
+        
+                  <% if (item.menu_option_name !== 'ไม่มีตัวเลือก') { %>
+                    <div class="text-muted">➕ <%= item.menu_option_name %> (+<%= item.option_price %> บาท)</div>
+                  <% } else { %>
+                    <div class="text-muted">➕ ไม่มีตัวเลือก</div>
+                  <% } %>
+        
+                  <div class="text-muted">💰 ราคาต่อชิ้น (รวมตัวเลือก): <%= item.item_price %> บาท</div>
+                </div>
+                <div>
+                  <span class="text-success">💰 ราคารวม: <%= item.total_item_price %> บาท</span>
+                </div>
+              </div>
+            </li>
+          <% }); %>
+        </ul>
+        
+        
+        <hr>
+
+        <p class="total-price"><strong>💰 ยอดรวมทั้งหมด:</strong> <%= order.total_price %> บาท</p>
+        <p><strong>📝 หมายเหตุ:</strong> <%= note %></p>
+
+        <p><strong>📦 สถานะออเดอร์:</strong> 
+          <span id="order-status" class="badge 
+            <% if (order.order_status === 'รอร้านค้ารับออเดอร์') { %> bg-warning text-dark
+            <% } else if (order.order_status === 'กำลังทำอาหาร') { %> bg-primary
+            <% } else if (order.order_status === 'อาหารเสร็จแล้ว') { %> bg-success
+            <% } else if (order.order_status === 'ร้านปฏิเสธ') { %> bg-danger <% } %>
+          ">
+            <%= order.order_status %>
+          </span>
+        </p>
+
+        <p><strong>📅 วันที่สั่ง:</strong> 
+          <%= new Date(order.created_at).toLocaleDateString('th-TH', { 
+              day: '2-digit', 
+              month: 'long', 
+              year: 'numeric', 
+              hour: '2-digit', 
+              minute: '2-digit', 
+              hour12: false 
+          }) %>
+        </p>
+
+        <div class="text-center mt-4">
+          <a href="/orders" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left"></i> กลับไปที่รายการคำสั่งซื้อ
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function refreshOrderStatus() {
+      const orderId = <%= order.order_id %>; // ใช้ order_id ปัจจุบัน
+      
+      fetch(`/api/order-status/${orderId}?timestamp=${new Date().getTime()}`) // ป้องกัน Cache
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const statusElement = document.querySelector("#order-status");
+  
+            // ตรวจสอบก่อนอัปเดต UI
+            if (statusElement && statusElement.textContent.trim() !== data.order_status.trim()) {
+              console.log(`อัปเดตสถานะ Order ${orderId} -> ${data.order_status}`);
+  
+              statusElement.textContent = data.order_status;
+  
+              // รีเซ็ตคลาสก่อนเพิ่มใหม่
+              statusElement.className = "badge";
+  
+              switch (data.order_status) {
+                case "รอร้านค้ารับออเดอร์":
+                  statusElement.classList.add("bg-warning", "text-dark");
+                  break;
+                case "กำลังทำอาหาร":
+                  statusElement.classList.add("bg-primary");
+                  break;
+                case "อาหารเสร็จแล้ว":
+                  statusElement.classList.add("bg-success");
+                  break;
+                case "ร้านปฏิเสธ":
+                  statusElement.classList.add("bg-danger");
+                  break;
+                default:
+                  statusElement.classList.add("bg-secondary"); // กัน Error สถานะที่ไม่รู้จัก
+              }
+            }
+          }
+        })
+        .catch(error => console.error("Error fetching order status:", error));
+    }
+  
+    // อัปเดตทุกๆ 5 วินาที
+    setInterval(refreshOrderStatus, 5000);
+  </script>
+  
+
+
+</body>
+</html>
